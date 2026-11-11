@@ -65,7 +65,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(libio)
 
 set(SRC_libcerts
-   "${CORESDK_DIR}/src/core/core.h"   
+    "${CORESDK_DIR}/src/core/core.h"   
     "${CORESDK_DIR}/src/core/core.c"  
     #
 
@@ -90,9 +90,8 @@ set(SRC_libcerts
  
 add_library(libcerts SHARED ${SRC_libcerts})
 
-
 target_include_directories(libcerts PRIVATE
-    "${CORESDK_DIR}/src/core"                             # Para resolver rutas relativas del SDK
+    "${CORESDK_DIR}/src/core"                         
     "${LIBSTRING_DIR}/src/strings/core"  
     "${LIBIO_DIR}/src/io/core"  
     "${LIBCRYPTO_DIR}/src/crypto/core"  
@@ -116,7 +115,7 @@ set(DIR_BIN "${CMAKE_CURRENT_SOURCE_DIR}/../../bin/${DIR_BUILD}")
 set_target_properties(libcerts PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${DIR_BIN}/$<CONFIG>"
     LIBRARY_OUTPUT_DIRECTORY "${DIR_BIN}/$<CONFIG>"
-      ARCHIVE_OUTPUT_DIRECTORY "${DIR_BIN}/$<CONFIG>"
+    ARCHIVE_OUTPUT_DIRECTORY "${DIR_BIN}/$<CONFIG>"
 )
  
 add_custom_command(TARGET libcerts POST_BUILD

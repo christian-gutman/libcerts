@@ -1,0 +1,7 @@
+[package]
+name = "prueba_cert"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# No se necesitan dependencias externas, usaremos la API estándar de Rust

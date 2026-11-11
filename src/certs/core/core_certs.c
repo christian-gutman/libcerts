@@ -95,6 +95,157 @@ char *Cert_SignMessage(const char *pXml, int xmlLen, const char *pPfxPath, int p
 {
     if (!pXml || xmlLen <= 0 || !pPfxPath || pfxLen <= 0) return NULL;
 
+    wchar_t *wPfxPath = StrAutoToUnicode(pPfxPath, pfxLen, NULL); // Asumo que esta función ya la tienes
+    if (!wPfxPath) return NULL;
+
+    wchar_t *wPwd = (pPwd && pwdLen > 0) ? StrAutoToUnicode(pPwd, pwdLen, NULL) : NULL;
+
+    DWORD fileSize = 0;
+    BYTE *fileBytes = ReadFileBytesC(wPfxPath, &fileSize); // Asumo que esta función ya la tienes
+    free(wPfxPath);
+
+    if (!fileBytes || fileSize == 0) {
+        if (wPwd) free(wPwd);
+        return NULL;
+    }
+
+    HCERTSTORE hStore = NULL;
+    PCCERT_CONTEXT pSignCert = NULL;
+    CRYPT_DATA_BLOB pfxBlob = { fileSize, fileBytes };
+
+    if (PFXIsPFXBlob(&pfxBlob)) {
+        hStore = PFXImportCertStore(&pfxBlob, wPwd ? wPwd : L"", CRYPT_EXPORTABLE);
+        if (hStore) {
+            pSignCert = CertEnumCertificatesInStore(hStore, NULL);
+        }
+    }
+
+    free(fileBytes);
+    if (wPwd) free(wPwd);
+
+    if (!pSignCert) {
+        if (hStore) CertCloseStore(hStore, 0);
+        return NULL;
+    }
+
+    CRYPT_SIGN_MESSAGE_PARA signPara = {0};
+    signPara.cbSize = sizeof(CRYPT_SIGN_MESSAGE_PARA);
+    signPara.dwMsgEncodingType = X509_ASN_ENCODING | PKCS_7_ASN_ENCODING;
+    signPara.pSigningCert = pSignCert;
+    signPara.HashAlgorithm.pszObjId = (LPSTR)szOID_NIST_sha256; // SHA-256
+
+    const BYTE *rgpbToBeSigned[1] = { (const BYTE *)pXml };
+    DWORD rgcbToBeSigned[1] = { (DWORD)xmlLen };
+    DWORD cbSignedMsg = 0;
+    char *base64Str = NULL;
+    if (CryptSignMessage(&signPara, FALSE, 1, rgpbToBeSigned, rgcbToBeSigned, NULL, &cbSignedMsg)) {
+        BYTE *signedBlob = (BYTE *)malloc(cbSignedMsg);
+        if (signedBlob) {
+            if (CryptSignMessage(&signPara, FALSE, 1, rgpbToBeSigned, rgcbToBeSigned, signedBlob, &cbSignedMsg))
+            {
+                DWORD base64Len = 0;
+                DWORD flags = CRYPT_STRING_BASE64 | CRYPT_STRING_NOCRLF;
+                if (CryptBinaryToStringA(signedBlob, cbSignedMsg, flags, NULL, &base64Len)) {
+                    base64Str = (char *)malloc(base64Len); // CryptBinaryToStringA ya incluye el espacio para el '\0'
+                    if (base64Str) {
+                        if (!CryptBinaryToStringA(signedBlob, cbSignedMsg, flags, base64Str, &base64Len)) {
+                            free(base64Str);
+                            base64Str = NULL;
+                        }
+                    }
+                }
+            }
+            free(signedBlob);
+        }
+    }
+
+    if (pSignCert) CertFreeCertificateContext(pSignCert);
+    if (hStore) CertCloseStore(hStore, 0);
+
+    return base64Str;
+}
+
+BYTE *Cert_SignMessageB(
+    const char *pXml, 
+    int xmlLen, 
+    const char *pPfxPath, 
+    int pfxLen, 
+    const char *pPwd, 
+    int pwdLen, 
+    DWORD *outSignedLen)
+{ 
+    if (!pXml || xmlLen <= 0 || !pPfxPath || pfxLen <= 0 || !outSignedLen) return NULL;
+    
+    *outSignedLen = 0; 
+
+    wchar_t *wPfxPath = StrAutoToUnicode(pPfxPath, pfxLen, NULL);
+    if (!wPfxPath) return NULL;
+
+    wchar_t *wPwd = (pPwd && pwdLen > 0) ? StrAutoToUnicode(pPwd, pwdLen, NULL) : NULL;
+
+    DWORD fileSize = 0;
+    BYTE *fileBytes = ReadFileBytesC(wPfxPath, &fileSize);
+    free(wPfxPath);
+
+    if (!fileBytes || fileSize == 0) {
+        if (wPwd) free(wPwd);
+        return NULL;
+    }
+
+    HCERTSTORE hStore = NULL;
+    PCCERT_CONTEXT pSignCert = NULL;
+    CRYPT_DATA_BLOB pfxBlob = { fileSize, fileBytes };
+
+    if (PFXIsPFXBlob(&pfxBlob)) {
+        hStore = PFXImportCertStore(&pfxBlob, wPwd ? wPwd : L"", CRYPT_EXPORTABLE);
+        if (hStore) {
+            pSignCert = CertEnumCertificatesInStore(hStore, NULL);
+        }
+    }
+
+    free(fileBytes);
+    if (wPwd) free(wPwd);
+
+    if (!pSignCert) {
+        if (hStore) CertCloseStore(hStore, 0);
+        return NULL;
+    }
+
+    CRYPT_SIGN_MESSAGE_PARA signPara = {0};
+    signPara.cbSize = sizeof(CRYPT_SIGN_MESSAGE_PARA);
+    signPara.dwMsgEncodingType = X509_ASN_ENCODING | PKCS_7_ASN_ENCODING;
+    signPara.pSigningCert = pSignCert;
+    signPara.HashAlgorithm.pszObjId = (LPSTR)szOID_NIST_sha256;
+
+    const BYTE *rgpbToBeSigned[1] = { (const BYTE *)pXml };
+    DWORD rgcbToBeSigned[1] = { (DWORD)xmlLen };
+    DWORD cbSignedMsg = 0;
+    BYTE *signedBlob = NULL;
+ 
+    if (CryptSignMessage(&signPara, FALSE, 1, rgpbToBeSigned, rgcbToBeSigned, NULL, &cbSignedMsg)) {
+ 
+        signedBlob = (BYTE *)malloc(cbSignedMsg);
+        if (signedBlob) { 
+            if (CryptSignMessage(&signPara, FALSE, 1, rgpbToBeSigned, rgcbToBeSigned, signedBlob, &cbSignedMsg)) {
+ 
+                *outSignedLen = cbSignedMsg;
+            } else { 
+                free(signedBlob);
+                signedBlob = NULL;
+            }
+        }
+    }
+ 
+    CertFreeCertificateContext(pSignCert);
+    if (hStore) CertCloseStore(hStore, 0);
+
+    return signedBlob;  
+}
+
+char *Cert_SignMessageB(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen)
+{
+    if (!pXml || xmlLen <= 0 || !pPfxPath || pfxLen <= 0) return NULL;
+
     wchar_t *wPfxPath = StrAutoToUnicode(pPfxPath, pfxLen, NULL);
     if (!wPfxPath) return NULL;
 
@@ -165,4 +316,10 @@ char *Cert_SignMessage(const char *pXml, int xmlLen, const char *pPfxPath, int p
     if (hStore) CertCloseStore(hStore, 0);
 
     return base64Str;
+}
+
+void Cert_Free(void *ptr) {
+    if (ptr) {
+        free(ptr);
+    }
 }
