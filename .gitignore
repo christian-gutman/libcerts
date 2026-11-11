@@ -14,3 +14,7 @@ vendor/
 Thumbs.db
  
 *.log'
+.vs
+.vscode
+
+obj/
