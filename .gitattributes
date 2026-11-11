@@ -2,3 +2,5 @@
 *.bat linguist-vendored
 CMakeLists.txt linguist-vendored
 *.cmake linguist-vendored
+examples/**/* linguist-documentation=false
+examples/**/* linguist-detectable=true
