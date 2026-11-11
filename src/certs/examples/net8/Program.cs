@@ -74,11 +74,11 @@ try
     }
 
     // -------------------------------------------------------------------------
-    // 3. FIRMAR MENSAJE EN BINARIO PURO (Cert_SignMessageBin)
+    // 3. FIRMAR MENSAJE EN BINARIO PURO (Cert_SignMessageB)
     // -------------------------------------------------------------------------
     Console.WriteLine("[3/3] Firmando XML y extrayendo el bloque binario PKCS#7...");
 
-    IntPtr pBinResult = CertApiNative.Cert_SignMessageBin(
+    IntPtr pBinResult = CertApiNative.Cert_SignMessageB(
         XmlPayload, XmlPayload.Length,
         CertPath, CertPath.Length,
         CertPassword, CertPassword.Length,
@@ -161,7 +161,7 @@ public static class CertApiNative
     );
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern IntPtr Cert_SignMessageBin(
+    public static extern IntPtr Cert_SignMessageB(
         string pXml,
         int xmlLen,
         string pPfxPath,

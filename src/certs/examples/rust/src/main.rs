@@ -24,7 +24,7 @@ extern "C" {
         pwdLen: c_int,
     ) -> *mut c_char;
 
-    fn Cert_SignMessageBin(
+    fn Cert_SignMessageB(
         pXml: *const c_char,
         xmlLen: c_int,
         pPfxPath: *const c_char,

@@ -24,7 +24,7 @@ try {
     certApi = ffi.Library(dllPath, {
         'Cert_GetExpiry': [intType, [charPtr, intType, charPtr, intType, charPtr, sizeType]],
         'Cert_SignMessage': [charPtr, [charPtr, intType, charPtr, intType, charPtr, intType]],
-        'Cert_SignMessageBin': [voidPtr, [charPtr, intType, charPtr, intType, charPtr, intType, dwordPtr]],
+        'Cert_SignMessageB': [voidPtr, [charPtr, intType, charPtr, intType, charPtr, intType, dwordPtr]],
         'Cert_Free': [ref.types.void, [voidPtr]]
     });
 } catch (err) {
@@ -81,13 +81,13 @@ if (pBase64Str && !pBase64Str.isNull()) {
 }
 
 // -------------------------------------------------------------------------
-// 3. PROBAR: Cert_SignMessageBin (Retorna Bloque Binario PKCS#7)
+// 3. PROBAR: Cert_SignMessageB (Retorna Bloque Binario PKCS#7)
 // -------------------------------------------------------------------------
 console.log('[3/3] Firmando XML y extrayendo el bloque binario PKCS#7...');
  
 const pOutSignedLen = ref.alloc(dwordType);
 
-const pBinResult = certApi.Cert_SignMessageBin(
+const pBinResult = certApi.Cert_SignMessageB(
     xmlPayload, xmlPayload.length,
     certPath, certPath.length,
     certPwd, certPwd.length,

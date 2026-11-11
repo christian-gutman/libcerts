@@ -8,6 +8,7 @@ SET DEVELOPMENT ON
 * Asegúrate de que libcerts.dll esté en el mismo directorio o en el PATH de Windows
 
 LOCAL lcDll, lcPfxPath, lcPfxPwd, lcXmlPayload
+
 lcDll        = "libcerts.dll" 
 lcPfxPath    = "certificado.pfx"
 lcPfxPwd     = "tu_password_aqui"
@@ -32,8 +33,8 @@ TRY
         STRING pPfxPath, INTEGER pfxLen, ;
         STRING pPwd, INTEGER pwdLen
 
-    * BYTE *Cert_SignMessageBin(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen, DWORD *outSignedLen)
-    DECLARE LONG Cert_SignMessageBin IN (lcDll) ;
+    * BYTE *Cert_SignMessageB(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen, DWORD *outSignedLen)
+    DECLARE LONG Cert_SignMessageB IN (lcDll) ;
         STRING pXml, INTEGER xmlLen, ;
         STRING pPfxPath, INTEGER pfxLen, ;
         STRING pPwd, INTEGER pwdLen, ;
@@ -115,14 +116,14 @@ ENDIF
 
 
 * =============================================================================
-* 3. PROBAR: Cert_SignMessageBin (Retorna Bloque Binario PKCS#7 mediante puntero)
+* 3. PROBAR: Cert_SignMessageB (Retorna Bloque Binario PKCS#7 mediante puntero)
 * =============================================================================
 ? "[3/3] Firmando XML y obteniendo el bloque binario crudo..."
 
 LOCAL lnPtrBin, lnOutSignedLen, lcBinFinal
 lnOutSignedLen = 0
 
-lnPtrBin = Cert_SignMessageBin(;
+lnPtrBin = Cert_SignMessageB(;
     lcXmlPayload, LEN(lcXmlPayload), ;
     lcPfxPath, LEN(lcPfxPath), ;
     lcPfxPwd, LEN(lcPfxPwd), ;

@@ -16,7 +16,7 @@ try {
     $ffi = FFI::cdef("
         int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen, char *outputDate, size_t maxDateLen);
         char *Cert_SignMessage(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen);
-        unsigned char *Cert_SignMessageBin(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen, unsigned long *outSignedLen);
+        unsigned char *Cert_SignMessageB(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen, unsigned long *outSignedLen);
         void Cert_Free(void *ptr);
     ", $dllPath);
 
@@ -72,13 +72,13 @@ if ($pBase64Str !== null && !FFI::isNull($pBase64Str)) {
 
 
 // -------------------------------------------------------------------------
-// 3. PROBAR: Cert_SignMessageBin (Retorna Bloque Binario PKCS#7)
+// 3. PROBAR: Cert_SignMessageB (Retorna Bloque Binario PKCS#7)
 // -------------------------------------------------------------------------
 echo "[3/3] Firmando XML y extrayendo el bloque binario PKCS#7...\n";
  
 $outSignedLen = FFI::new("unsigned long");
 
-$pBinResult = $ffi->Cert_SignMessageBin(
+$pBinResult = $ffi->Cert_SignMessageB(
     $xmlPayload, strlen($xmlPayload),
     $certPath, strlen($certPath),
     $certPwd, strlen($certPwd),
