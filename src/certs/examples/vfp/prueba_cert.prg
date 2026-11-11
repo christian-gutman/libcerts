@@ -5,7 +5,8 @@ CLEAR
 SET DEVELOPMENT ON
 
 * --- CONFIGURACIÓN DE RUTAS ---
-* Asegúrate de que TuLibreria.dll esté en el mismo directorio o en el PATH de Windows
+* Asegúrate de que libcerts.dll esté en el mismo directorio o en el PATH de Windows
+
 LOCAL lcDll, lcPfxPath, lcPfxPwd, lcXmlPayload
 lcDll        = "libcerts.dll" 
 lcPfxPath    = "certificado.pfx"
