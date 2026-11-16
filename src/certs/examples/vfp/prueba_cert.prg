@@ -11,7 +11,7 @@ LOCAL lcDll, lcPfxPath, lcPfxPwd, lcXmlPayload
 
 lcDll        = "libcerts.dll" 
 lcPfxPath    = "certificado.pfx"
-lcPfxPwd     = "tu_password_aqui"
+lcPfxPwd     = "privada"
 lcXmlPayload = "<Factura><Id>12345</Id><Total>150.00</Total></Factura>"
 
 ? "=== INICIANDO PRUEBA DE CORE_API DESDE FOXPRO ==="

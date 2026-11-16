@@ -3,7 +3,7 @@ using System.Text;
 
 const string DllPath = "libcerts.dll";
 const string CertPath = "certificado.pfx";
-const string CertPassword = "tu_password_aqui";
+const string CertPassword = "privada";
 
 const string XmlPayload = "<Factura><Id>12345</Id><Total>150.00</Total></Factura>";
 

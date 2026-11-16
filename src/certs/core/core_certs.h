@@ -5,6 +5,7 @@
 
 #ifndef CORE_CERTS_H
 #define CORE_CERTS_H
+ 
 
 #include "core.h"
 #include "core_io.h"
@@ -35,8 +36,8 @@ extern "C"
      *
      * @note El formato de la cadena resultante en \p outputDate dependerá de la codificación interna del certificado.
      */
-    CORE_API int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen, char *outputDate, size_t maxDateLen);
-
+    // CORE_API int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen, char *outputDate, size_t maxDateLen);
+    CORE_API int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen, char *outputDate, int maxDateLen);
     /**
      * @brief Firma un mensaje y codifica el resultado en una cadena Base64 plana.
      * 
@@ -88,13 +89,14 @@ extern "C"
      * @sa Cert_Free
      */
     CORE_API BYTE *Cert_SignMessageB(
-        const char *pXml,
-        int xmlLen,
-        const char *pPfxPath,
-        int pfxLen,
-        const char *pPwd,
-        int pwdLen,
-        DWORD *outSignedLen);
+        const char *pXml, 
+        int xmlLen, 
+        const char *pPfxPath, 
+        int pfxLen, 
+        const char *pPwd, 
+        int pwdLen, 
+        DWORD *outSignedLen
+    );
 
     /**
      * @brief Libera la memoria dinámica asignada por las funciones de la API Core.

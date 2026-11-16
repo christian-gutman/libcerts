@@ -121,5 +121,5 @@ set_target_properties(libcerts PROPERTIES
 add_custom_command(TARGET libcerts POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/examples"
-        "$<TARGET_FILE_DIR:libcerts>/"
+        "$<TARGET_FILE_DIR:libcerts>/examples"
 )

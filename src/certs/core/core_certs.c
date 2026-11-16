@@ -4,10 +4,12 @@
 #ifndef CRYPT_STRING_BASE64RAW
     #define CRYPT_STRING_BASE64RAW 0x00000009
 #endif
-  
-int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen, char *outputDate, size_t maxDateLen)
+
+int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen, char *outputDate, int maxDateLen)
 {
-    if (!pPath || pathLen <= 0 || !outputDate) return 0;
+    if (!pPath || pathLen <= 0 || !outputDate || maxDateLen < 20) return 0;
+ 
+    memset(outputDate, 0, maxDateLen);
 
     wchar_t *wPath = StrAutoToUnicode(pPath, pathLen, NULL);
     if (!wPath) return 0;
@@ -29,8 +31,21 @@ int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen,
 
     if (PFXIsPFXBlob(&pfxBlob)) {
         hStore = PFXImportCertStore(&pfxBlob, wPwd ? wPwd : L"", CRYPT_EXPORTABLE);
-        if (hStore) {
-            pCertContext = CertEnumCertificatesInStore(hStore, NULL);
+        if (!hStore && !wPwd) {
+            hStore = PFXImportCertStore(&pfxBlob, NULL, CRYPT_EXPORTABLE);
+        }
+        if (hStore) { 
+            PCCERT_CONTEXT pIter = NULL;
+            while ((pIter = CertEnumCertificatesInStore(hStore, pIter)) != NULL) {
+                DWORD cbData = 0;
+                if (CertGetCertificateContextProperty(pIter, CERT_KEY_PROV_INFO_PROP_ID, NULL, &cbData)) {
+                    pCertContext = pIter;
+                    break;
+                }
+            }
+            if (!pCertContext) {
+                pCertContext = CertEnumCertificatesInStore(hStore, NULL);
+            }
         }
     }
 
@@ -77,9 +92,10 @@ int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen,
 
     if (FileTimeToLocalFileTime(&pCertContext->pCertInfo->NotAfter, &localFileTime)) {
         if (FileTimeToSystemTime(&localFileTime, &sysTime)) {
-            if (sprintf_s(outputDate, maxDateLen, "%04d-%02d-%02d %02d:%02d:%02d",
-                          sysTime.wYear, sysTime.wMonth, sysTime.wDay,
-                          sysTime.wHour, sysTime.wMinute, sysTime.wSecond) != -1) {
+            int written = snprintf(outputDate, maxDateLen, "%04d-%02d-%02d %02d:%02d:%02d",
+                                   sysTime.wYear, sysTime.wMonth, sysTime.wDay,
+                                   sysTime.wHour, sysTime.wMinute, sysTime.wSecond);
+            if (written > 0 && written < maxDateLen) {
                 success = 1;
             }
         }
@@ -90,6 +106,7 @@ int Cert_GetExpiry(const char *pPath, int pathLen, const char *pPwd, int pwdLen,
 
     return success;
 }
+
 
 char *Cert_SignMessage(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen)
 {
@@ -241,7 +258,7 @@ BYTE *Cert_SignMessageB(
 
     return signedBlob;  
 }
-
+/*
 char *Cert_SignMessageB(const char *pXml, int xmlLen, const char *pPfxPath, int pfxLen, const char *pPwd, int pwdLen)
 {
     if (!pXml || xmlLen <= 0 || !pPfxPath || pfxLen <= 0) return NULL;
@@ -316,7 +333,7 @@ char *Cert_SignMessageB(const char *pXml, int xmlLen, const char *pPfxPath, int 
     if (hStore) CertCloseStore(hStore, 0);
 
     return base64Str;
-}
+}*/
 
 void Cert_Free(void *ptr) {
     if (ptr) {
