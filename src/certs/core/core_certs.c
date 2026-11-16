@@ -112,13 +112,15 @@ char *Cert_SignMessage(const char *pXml, int xmlLen, const char *pPfxPath, int p
 {
     if (!pXml || xmlLen <= 0 || !pPfxPath || pfxLen <= 0) return NULL;
 
-    wchar_t *wPfxPath = StrAutoToUnicode(pPfxPath, pfxLen, NULL); // Asumo que esta función ya la tienes
-    if (!wPfxPath) return NULL;
+    wchar_t *wPfxPath = StrAutoToUnicode(pPfxPath, pfxLen, NULL);
+    if (!wPfxPath){
+        return NULL;
+    } 
 
     wchar_t *wPwd = (pPwd && pwdLen > 0) ? StrAutoToUnicode(pPwd, pwdLen, NULL) : NULL;
 
     DWORD fileSize = 0;
-    BYTE *fileBytes = ReadFileBytesC(wPfxPath, &fileSize); // Asumo que esta función ya la tienes
+    BYTE *fileBytes = ReadFileBytesC(wPfxPath, &fileSize); 
     free(wPfxPath);
 
     if (!fileBytes || fileSize == 0) {
